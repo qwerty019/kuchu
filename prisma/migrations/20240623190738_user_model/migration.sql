@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "applied" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "promo" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "share" BOOLEAN NOT NULL DEFAULT false;

@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+
+    /* Desktop grid: sidebar w-60 + cart w-80 + gutters (16px) */
+    --kuchu-sidebar-w: 15rem;
+    --kuchu-cart-w: 20rem;
+    --kuchu-edge: 1rem;
+    --kuchu-main-ml: calc(var(--kuchu-sidebar-w) + var(--kuchu-edge) * 2);
+    --kuchu-main-mr: calc(var(--kuchu-cart-w) + var(--kuchu-edge) * 2);
+    --kuchu-main-w: calc(100% - var(--kuchu-main-ml) - var(--kuchu-main-mr));
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+body {
+  pointer-events: auto !important;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.active-bullet div {
+  animation: 3s ease-in countingBar alternate;
+  background-color: #fff !important;
+}
+
+@keyframes countingBar {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.main-page {
+  @apply min-w-0 w-full flex flex-1 flex-col bg-background px-4 pb-4 max-lg:pt-4 max-lg:min-h-[calc(100dvh-4.25rem-env(safe-area-inset-bottom,0px)-0.5rem)] max-lg:rounded-none lg:min-h-[calc(100vh-64px-16px-16px)] lg:w-[var(--kuchu-main-w)] lg:rounded-2xl lg:p-4 lg:pt-0 lg:ml-[var(--kuchu-main-ml)] lg:mr-[var(--kuchu-main-mr)];
+}
+
+@layer utilities {
+  /* Главная: 2/3 области над нижней навигацией (4.25rem + 0.5rem — как в layout) */
+  .home-banner-mobile-height {
+    height: calc(
+      (100dvh - 4.25rem - 0.5rem - env(safe-area-inset-bottom, 0px)) * 2 / 3
+    );
+  }
+}
+
+.admin-page {
+  @apply min-w-0 w-full min-h-[calc(100vh-64px-14px)] lg:min-h-[calc(100vh-64px-16px-16px)] flex flex-col bg-background rounded-2xl p-4 lg:ml-[calc(240px+16px+16px)] lg:mr-4 z-10;
+}

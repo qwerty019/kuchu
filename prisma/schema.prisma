@@ -1,0 +1,547 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  name          String?
+  surname       String?
+  patronymic    String?
+  avatar        String?
+  dob           DateTime?      @db.Date
+  phone         String?
+  email         String?
+  password      String?
+  roles         String[]
+  method        String?
+  branchId      Int?
+  branch        Branch?        @relation(fields: [branchId], references: [id])
+  applied       Boolean        @default(false)
+  share         Boolean        @default(false)
+  promo         Boolean        @default(false)
+  isDeleted     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  orders        Order[]
+  payments      Payment[]
+  addresses     Address[]
+  discountCards DiscountCard[]
+  sessions      Session[]
+  certs         Cert[]
+  searches      Search[]
+  userGoods     UserGood[]
+}
+
+model Session {
+  id        String   @id
+  userId    Int
+  expiresAt DateTime
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+
+model DiscountCard {
+  id                Int      @id @default(autoincrement())
+  userId            Int
+  user              User     @relation(fields: [userId], references: [id])
+  barcode           String
+  discount          Float
+  discountJ         Float
+  rateAccumulation  Float
+  rateAccumulationJ Float
+  accumulation      Float
+  isDeleted         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Address {
+  id        Int           @id @default(autoincrement())
+  userId    Int
+  user      User          @relation(fields: [userId], references: [id])
+  zoneId    Int?
+  zone      DeliveryZone? @relation(fields: [zoneId], references: [id])
+  address   String
+  entrance  String?
+  floor     String?
+  apartment String?
+  comment   String?
+  lat       Float?
+  long      Float?
+  price     Float?
+  selected  Boolean       @default(false)
+  isDeleted Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  orders    Order[]
+}
+
+model Order {
+  id           Int          @id @default(autoincrement())
+  userId       Int
+  user         User         @relation(fields: [userId], references: [id])
+  addressId    Int?
+  address      Address?     @relation(fields: [addressId], references: [id])
+  branchId     Int?
+  branch       Branch?      @relation(fields: [branchId], references: [id])
+  deliveryFee  Float?
+  deliveryTime String?
+  sum          Float
+  allSum       Float
+  paymentType  String
+  status       String
+  fbId         Int
+  isDeleted    Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  payments     Payment[]
+  orderGoods   OrderGood[]
+  orderpromos  OrderPromo[]
+}
+
+model OrderGood {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id])
+  goodId    Int
+  good      Good     @relation(fields: [goodId], references: [id])
+  qnt       Int
+  price     Float
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Float
+  status    String?
+  ykId      String?
+  url       String?
+  token     String?
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Call {
+  id        Int      @id @default(autoincrement())
+  phone     String
+  callId    String
+  code      String
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model City {
+  id        Int            @id @default(autoincrement())
+  title     String
+  route     String
+  isDeleted Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  branches  Branch[]
+  zones     DeliveryZone[]
+}
+
+model DeliveryZone {
+  id           Int       @id @default(autoincrement())
+  cityId       Int
+  city         City      @relation(fields: [cityId], references: [id])
+  title        String
+  price        Float
+  threshold    Float
+  freeDelivery Float
+  polygon      String
+  color        String
+  isDeleted    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  addresses    Address[]
+}
+
+model Branch {
+  id            Int           @id @default(autoincrement())
+  cityId        Int
+  city          City          @relation(fields: [cityId], references: [id])
+  title         String
+  address       String?
+  fbId          Int?
+  lat           Float?
+  long          Float?
+  main          Boolean       @default(false)
+  isDeleted     Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  osts          Ost[]
+  users         User[]
+  orders        Order[]
+  storybranches StoryBranch[]
+  salebranches  SaleBranch[]
+  certbranches  CertBranch[]
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  title     String
+  route     String
+  position  Int?
+  url       String?
+  parent    Category?  @relation("CategoryToParent", fields: [parentId], references: [id])
+  parentId  Int? // Nullable to represent no parent
+  children  Category[] @relation("CategoryToParent") // Child categories
+  isDeleted Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  goods     Good[]
+  stories   Slide[]
+  sales     Sale[]
+}
+
+model Good {
+  id         Int          @id @default(autoincrement())
+  categoryId Int?
+  category   Category?    @relation(fields: [categoryId], references: [id])
+  regId      Int
+  drugId     Int
+  formId     Int
+  fabrId     Int
+  mnnId      Int
+  drug       String
+  form       String
+  fabr       String
+  mnn        String
+  flag       Int
+  ean        String
+  isVital    Boolean
+  isService  Boolean
+  rSum       Float
+  torgname   String?
+  formoutput String?
+  img        String?
+  fullName   String?
+  desc_id    Int?
+  imported   Boolean      @default(false)
+  isDeleted  Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  ost        Ost[]
+  orderGoods OrderGood[]
+  salegoods  SaleGood[]
+  collgoods  CollGood[]
+  contents   Content[]
+  filters    GoodFilter[]
+  userGoods  UserGood[]
+  classgoods ClassGood[]
+}
+
+model Filter {
+  id      Int            @id @default(autoincrement())
+  title   String
+  type    String
+  options FilterOption[]
+}
+
+model FilterOption {
+  id       Int          @id @default(autoincrement())
+  filterId Int
+  filter   Filter       @relation(fields: [filterId], references: [id])
+  value    String
+  goods    GoodFilter[]
+}
+
+model GoodFilter {
+  id       Int          @id @default(autoincrement())
+  goodId   Int
+  good     Good         @relation(fields: [goodId], references: [id])
+  optionId Int
+  option   FilterOption @relation(fields: [optionId], references: [id])
+
+  @@unique([goodId, optionId])
+}
+
+model Content {
+  id        Int      @id @default(autoincrement())
+  goodId    Int
+  good      Good     @relation(fields: [goodId], references: [id])
+  title     String
+  content   String
+  text      String
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ost {
+  id              Int      @id @default(autoincrement())
+  goodId          Int
+  good            Good     @relation(fields: [goodId], references: [id])
+  branchId        Int
+  branch          Branch   @relation(fields: [branchId], references: [id])
+  naklDataId      Int
+  uQntOst         Float
+  priceRoznWNDS   Float
+  fixPriceValue   Float
+  jv              Boolean
+  brakLS          Boolean
+  isAptekaRu      Boolean
+  isPersonalOrder Boolean
+  recipe          Boolean
+  uQntRez         Float
+  nds             Int
+  srokG           String
+  isDeleted       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Promo {
+  id            Int          @id @default(autoincrement())
+  code          String
+  percent       Float?
+  amount        Float?
+  forFirstOrder Boolean      @default(false)
+  completed     Boolean      @default(false)
+  isDeleted     Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  orderpromos   OrderPromo[]
+}
+
+model OrderPromo {
+  id        Int      @id @default(autoincrement())
+  promoId   Int
+  promo     Promo    @relation(fields: [promoId], references: [id])
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id])
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Story {
+  id            Int           @id @default(autoincrement())
+  title         String
+  img           String
+  position      Int?
+  show          Boolean       @default(true)
+  completed     Boolean       @default(false)
+  isDeleted     Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  slides        Slide[]
+  storybranches StoryBranch[]
+}
+
+model StoryBranch {
+  id        Int      @id @default(autoincrement())
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id])
+  branchId  Int
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Slide {
+  id         Int       @id @default(autoincrement())
+  story      Story     @relation(fields: [storyId], references: [id])
+  storyId    Int
+  title      String
+  subtitle   String?
+  text       String
+  img        String
+  link       String?
+  button     String?
+  categoryId Int?
+  category   Category? @relation(fields: [categoryId], references: [id])
+  isDeleted  Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Sale {
+  id           Int          @id @default(autoincrement())
+  title        String
+  img          String
+  images       String[]
+  position     Int?
+  subtitle     String?
+  text         String?
+  categoryId   Int?
+  category     Category?    @relation(fields: [categoryId], references: [id])
+  startDate    DateTime     @db.Date
+  endDate      DateTime     @db.Date
+  show         Boolean      @default(true)
+  isDeleted    Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  salebranches SaleBranch[]
+  salegoods    SaleGood[]
+}
+
+model SaleBranch {
+  id        Int      @id @default(autoincrement())
+  saleId    Int
+  sale      Sale     @relation(fields: [saleId], references: [id])
+  branchId  Int
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SaleGood {
+  id        Int      @id @default(autoincrement())
+  saleId    Int
+  sale      Sale     @relation(fields: [saleId], references: [id])
+  goodId    Int
+  good      Good     @relation(fields: [goodId], references: [id])
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model NavText {
+  id        Int      @id @default(autoincrement())
+  text      String
+  show      Boolean  @default(false)
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Collection {
+  id        Int        @id @default(autoincrement())
+  title     String
+  img       String?
+  position  Int?
+  show      Boolean    @default(false)
+  isDeleted Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  collgoods CollGood[]
+}
+
+model CollGood {
+  id           Int        @id @default(autoincrement())
+  goodId       Int
+  good         Good       @relation(fields: [goodId], references: [id])
+  collectionId Int
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  isDeleted    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Cert {
+  id           Int           @id @default(autoincrement())
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id])
+  title        String
+  status       Int
+  nominal      Int
+  number       String
+  expDate      DateTime      @db.Date
+  email        String
+  code         String?
+  isPaid       Boolean       @default(false)
+  isDeleted    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  certbranches CertBranch[]
+  payments     CertPayment[]
+}
+
+model CertBranch {
+  id        Int      @id @default(autoincrement())
+  certId    Int
+  cert      Cert     @relation(fields: [certId], references: [id])
+  branchId  Int
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CertPayment {
+  id        Int      @id @default(autoincrement())
+  certId    Int
+  cert      Cert     @relation(fields: [certId], references: [id])
+  amount    Float
+  status    String?
+  ykId      String?
+  url       String?
+  token     String?
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CertOption {
+  id        Int      @id @default(autoincrement())
+  nominal   Int
+  url       String?
+  title     String?
+  show      Boolean  @default(false)
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Search {
+  id        Int      @id @default(autoincrement())
+  query     String
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Suggestion {
+  id        Int      @id @default(autoincrement())
+  title     String
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserGood {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  goodId    Int
+  good      Good     @relation(fields: [goodId], references: [id])
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Classifier {
+  id         Int         @id @default(autoincrement())
+  title      String
+  classgoods ClassGood[]
+}
+
+model ClassGood {
+  id      Int        @id @default(autoincrement())
+  goodId  Int
+  good    Good       @relation(fields: [goodId], references: [id])
+  classId Int
+  class   Classifier @relation(fields: [classId], references: [id])
+}
