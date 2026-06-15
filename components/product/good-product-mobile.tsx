@@ -17,7 +17,9 @@ export default function GoodProductMobile({
 
   return (
     <div className='flex flex-col gap-4'>
-      <Upper title={title} />
+      <div className='sticky top-0 z-10 bg-background pt-2'>
+        <Upper title={title} />
+      </div>
       <GoodProductContent
         good={good}
         similar={similar}
